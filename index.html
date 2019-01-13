@@ -1,12 +1,23 @@
 ---
 layout: default
-home-title: 天行健，君子以自强不息<br><br>地势坤，君子以厚德载物
-header-img: "assets/img/timg.jpg"
+home-title: 天行健，君子以自强不息;地势坤，君子以厚德载物<br><br>一路奋战，不是为了改变世界，而是为了不让世界改变我们
+header-img: "assets/img/sky.jpg"
 <!-- description: 或许是最漂亮的Jekyll主题 -->
 ---
 
 {% include header.html %}
+<head>
+    <meta name="google-site-verification" content="T5oM-VltOKz1MKuA7DX6SFuYbzNz817L7rrxKHn9R0A" />
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131379485-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
 
+        gtag('config', 'UA-131379485-1');
+    </script>
+</head>
 <div class="g-banner home-banner {{ site.theme-color | prepend: 'banner-theme-' }}" data-theme="{{ site.theme-color }}">
     <h2>{{ page.home-title }}</h2>
     <h3>{{ page.description }}</h3>
