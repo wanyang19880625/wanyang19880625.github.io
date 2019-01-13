@@ -1,7 +1,7 @@
 # Site settings 配置站点
-title: '万杨的博客'
+title: '曹禺穆易的博客'
 description: '不会玩dota的程序猿不是一个好厨师'
-keyword: '万杨, 万杨的博客, Web后端, Web后端开发, Web后端博客, java,设计,dota爱好者'
+keyword: '曹禺穆易, 曹禺穆易的博客, Web后端, Web后端开发, Web后端博客, java,设计,dota爱好者'
 url: 'https://wanyang19880625.github.io/' # your host
 
 # if you don't need baseurl, you should leave this value blank.
@@ -17,8 +17,8 @@ footer:
   since: 2017
 
 # Author 配置博主信息
-author: '万杨'
-nickname: '万杨'
+author: '曹禺穆易'
+nickname: '曹禺穆易'
 bio: 'Java后端开发，爱生活，爱技术，爱dota'
 avatar: '/assets/img/avatar.jpg'
 

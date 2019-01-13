@@ -3,7 +3,7 @@ layout: post
 title: '年底总结and新年计划'
 date: 2018-12-31
 categories: 总结
-tags: 总结 计划
+tags: 总结计划
 ---
 
 公历上新的一年即将开始，有必要总结即将过去的一年，展望新的一年。
