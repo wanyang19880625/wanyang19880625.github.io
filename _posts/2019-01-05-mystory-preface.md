@@ -20,6 +20,3 @@ tags: 个人自传
 
 逝者如斯夫，不舍昼夜。时间是个令人生畏的东西，他给我们带来了很多美好的东西，亲情、朋友、爱情、友情，同时他也慢慢的把亲情、朋友、爱情、友情从你身边无情的剥夺，虽然有时在我们还没来得及反应过来的时候就把这些带走了，不管美好还是不美好的，都会随着时间慢慢流逝了，但是唯一不能剥夺的是存在于脑海里的记忆，一句无意间的话，一句美好的歌词，都会唤醒那些美好的亦或是带有遗憾的回忆，我不想这些回忆在我老去的时候随着我就消失了，我始终相信这些记忆的存在是有意义的，想趁着自己还清醒的时候记录下来。
 
-<br><br>
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;2019年1月
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;上海

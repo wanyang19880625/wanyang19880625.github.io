@@ -77,3 +77,6 @@ permalink: /:year/:month/:day/:title.html
 
 # Plugins
 plugins: [jekyll-paginate,jekyll-sitemap,jekyll-seo-tag]
+
+#port
+port: 4001
