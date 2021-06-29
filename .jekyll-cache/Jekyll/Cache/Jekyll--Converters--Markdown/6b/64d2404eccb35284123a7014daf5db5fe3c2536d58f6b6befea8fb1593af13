@@ -1,0 +1,165 @@
+I"+8<h3 id="threadlocal的使用和总结">ThreadLocal的使用和总结</h3>
+
+<p>参考文章链接：</p>
+
+<ul>
+  <li>https://www.justdojava.com/2019/05/12/java-threadlocal/</li>
+  <li>http://www.jasongj.com/java/threadlocal/</li>
+</ul>
+
+<h4 id="没有使用threadlocal">没有使用ThreadLocal</h4>
+
+<p>原文并没有说明线程不安全的具体原因，在注释出说明一下</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 线程不安全
+ * 主要表现:打印demo对象string可能会出现重复的
+ * 原因:string局部变量是9个线程的共享变量,其实是属于MyStringDemo对象的，在不同的线程对其进行set操作时是无序的,导致了string对象并不是严格的当前线程名称,所以打印时调用的getString()获取值可能会出现重复的情况
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyStringDemo</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">string</span><span class="o">;</span>
+
+    <span class="kd">private</span> <span class="nc">String</span> <span class="nf">getString</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">string</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">setString</span><span class="o">(</span><span class="nc">String</span> <span class="n">string</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">threads</span> <span class="o">=</span> <span class="mi">9</span><span class="o">;</span>
+        <span class="nc">MyStringDemo</span> <span class="n">demo</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">MyStringDemo</span><span class="o">();</span>
+        <span class="nc">CountDownLatch</span> <span class="n">countDownLatch</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">CountDownLatch</span><span class="o">(</span><span class="n">threads</span><span class="o">);</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">threads</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="nc">Thread</span> <span class="n">thread</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+                <span class="n">demo</span><span class="o">.</span><span class="na">setString</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">demo</span><span class="o">.</span><span class="na">getString</span><span class="o">());</span>
+                <span class="n">countDownLatch</span><span class="o">.</span><span class="na">countDown</span><span class="o">();</span>
+            <span class="o">},</span> <span class="s">"thread-"</span> <span class="o">+</span> <span class="n">i</span><span class="o">);</span>
+            <span class="n">thread</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>打印的具体结果（需要多次执行才能达到结果），发现有重复的名称出现:</p>
+
+<blockquote>
+  <p>thread-1<br />
+thread-3<br />
+thread-2<br />
+thread-1<br />
+thread-5<br />
+thread-4<br />
+thread-6<br />
+thread-7<br />
+thread-8<br /></p>
+</blockquote>
+
+<h4 id="使用threadlocal">使用ThreadLocal</h4>
+
+<p>下面这个例子是线程安全的，和之前区别就在于get和set方法使用了ThreadLocal的静态对象。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyThreadLocalStringDemo</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">ThreadLocal</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">threadLocal</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ThreadLocal</span><span class="o">&lt;&gt;();</span>
+
+    <span class="kd">private</span> <span class="nc">String</span> <span class="nf">getString</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">threadLocal</span><span class="o">.</span><span class="na">get</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">setString</span><span class="o">(</span><span class="nc">String</span> <span class="n">string</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">threadLocal</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">string</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">threads</span> <span class="o">=</span> <span class="mi">9</span><span class="o">;</span>
+        <span class="nc">MyThreadLocalStringDemo</span> <span class="n">demo</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">MyThreadLocalStringDemo</span><span class="o">();</span>
+        <span class="nc">CountDownLatch</span> <span class="n">countDownLatch</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">CountDownLatch</span><span class="o">(</span><span class="n">threads</span><span class="o">);</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">threads</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="nc">Thread</span> <span class="n">thread</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+                <span class="n">demo</span><span class="o">.</span><span class="na">setString</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">demo</span><span class="o">.</span><span class="na">getString</span><span class="o">());</span>
+                <span class="n">countDownLatch</span><span class="o">.</span><span class="na">countDown</span><span class="o">();</span>
+            <span class="o">},</span> <span class="s">"thread-"</span> <span class="o">+</span> <span class="n">i</span><span class="o">);</span>
+            <span class="n">thread</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>打印结果如下，不可能出现重复的名称:</p>
+<blockquote>
+  <p>thread-1
+thread-3
+thread-2
+thread-0
+thread-5
+thread-4
+thread-6
+thread-7
+thread-8</p>
+</blockquote>
+
+<p>那么为什么这样可以保证每个线程都获取到自己的名称，而不会和其他线程有冲突的情况出现呢？其实主要是和ThreadLocal这个类中定义的数据结构ThreadLocalMap有关系，主要有以下几点：</p>
+
+<ul>
+  <li>
+    <p>首先这个ThreadLocalMap对象是Thread类的一个局部变量，也就是说每个Thread都有一个不同的ThreadLocalMap对象，这点保证了线程数据之间的隔离性。</p>
+  </li>
+  <li>
+    <p>ThreadLocal的set和get方法会去初始化这个ThreadLocalMap，key是这个ThreadLocal对象，value就是不同线程的ThreadLocalMap对象的值</p>
+  </li>
+  <li>
+    <p>扩展：还可以有其他方式来达到目的吗？</p>
+
+    <p>答案：可以用锁synchronized和lock来保证线程安全，以此来达到数据准确</p>
+
+    <p>例如使用synchronized,例子如下：</p>
+
+    <div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyStringDemo</span> <span class="o">{</span>
+  
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">string</span><span class="o">;</span>
+  
+    <span class="kd">private</span> <span class="nc">String</span> <span class="nf">getString</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">string</span><span class="o">;</span>
+    <span class="o">}</span>
+  
+    <span class="kd">private</span> <span class="kt">void</span> <span class="nf">setString</span><span class="o">(</span><span class="nc">String</span> <span class="n">string</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">;</span>
+    <span class="o">}</span>
+  
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">threads</span> <span class="o">=</span> <span class="mi">9</span><span class="o">;</span>
+        <span class="nc">MyStringDemo</span> <span class="n">demo</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">MyStringDemo</span><span class="o">();</span>
+        <span class="nc">CountDownLatch</span> <span class="n">countDownLatch</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">CountDownLatch</span><span class="o">(</span><span class="n">threads</span><span class="o">);</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">threads</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+            <span class="kd">synchronized</span> <span class="o">(</span><span class="n">demo</span><span class="o">)</span> <span class="o">{</span>
+                <span class="nc">Thread</span> <span class="n">thread</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+                    <span class="n">demo</span><span class="o">.</span><span class="na">setString</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+                    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">demo</span><span class="o">.</span><span class="na">getString</span><span class="o">());</span>
+                    <span class="n">countDownLatch</span><span class="o">.</span><span class="na">countDown</span><span class="o">();</span>
+                <span class="o">},</span> <span class="s">"thread-"</span> <span class="o">+</span> <span class="n">i</span><span class="o">);</span>
+                <span class="n">thread</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>扩展问题：弱引用，强引用等等</p>
+
+    <p>答案:
+https://stackoverflow.com/questions/299659/whats-the-difference-between-softreference-and-weakreference-in-java</p>
+
+    <p>https://web.archive.org/web/20061130103858/http://weblogs.java.net/blog/enicholas/archive/2006/05/understanding_w.html</p>
+  </li>
+  <li>
+    <p>扩展问题：ThreadLocal典型的使用场景有哪些</p>
+
+    <p>答案:session场景是典型的threadlocal场景，比如mybatis官方的org.apache.ibatis.session.defaults.DefaultSqlSession就是没有使用threadlocal，不是线程安全的，而对应的SqlSessionManager则是线程安全</p>
+  </li>
+</ul>
+:ET
